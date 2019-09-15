@@ -8,4 +8,8 @@ keywords = ["mutable", "reference", "mut", "ref", "split"]
 documentation = "http://docs.rs/splitmut/"
 repository = "https://github.com/diwic/splitmut-rs"
 
+[features]
+serde-json-map = ["serde_json"]
+
 [dependencies]
+serde_json = { version = "1.0", optional = true }
