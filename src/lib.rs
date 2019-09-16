@@ -43,9 +43,6 @@ use std::collections::{HashMap, BTreeMap, HashSet, VecDeque};
 use std::marker::PhantomData;
 use std::{hash, borrow};
 
-#[cfg(feature = "serde-json-map")]
-use serde_json;
-
 /// Error returned from get*_mut functions.
 #[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Copy, Debug)]
 pub enum SplitMutError {
@@ -288,11 +285,19 @@ unsafe impl<'a, K: Ord + borrow::Borrow<Q>, Q: Ord + ?Sized, V> SplitMut<&'a Q, 
 }
 
 #[cfg(feature = "serde-json-map")]
-unsafe impl<'a, K: Ord + borrow::Borrow<Q>, Q: Ord + ?Sized, V> SplitMut<&'a Q, V> for serde_json::Map<K, V> {
+extern crate serde_json;
+
+#[cfg(feature = "serde-json-map")]
+use serde_json::{Map, Value};
+
+#[cfg(feature = "serde-json-map")]
+unsafe impl<'a, Q: Ord + Eq + hash::Hash + ?Sized> SplitMut<&'a Q, Value> for Map<String, Value>
+	where String: borrow::Borrow<Q>
+{
     #[inline]
-    fn get1_mut(&mut self, k: &'a Q) -> Option<&mut V> { self.get_mut(k) }
+    fn get1_mut(&mut self, k: &'a Q) -> Option<&mut Value> { self.get_mut(k) }
     #[inline]
-    unsafe fn get1_unchecked_mut(&mut self, k: &'a Q) -> &mut V { std::mem::transmute(self.get_mut(k)) }
+    unsafe fn get1_unchecked_mut(&mut self, k: &'a Q) -> &mut Value { std::mem::transmute(self.get_mut(k)) }
 }
 
 #[test]
